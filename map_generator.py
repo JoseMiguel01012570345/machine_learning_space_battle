@@ -49,6 +49,7 @@ class  map:
 						continue
 					
 					cell = self.paint_cell(i,j)
+			 	
 					row102.append(cell)
 					
 					pass    
@@ -127,17 +128,32 @@ class  map:
 
 		return True
 
+def comprise_data(map:list):
+    
+    comprised_map = []
+    
+    for i,row in enumerate(map):
+        
+        my_row = ""
+        for j,cell in enumerate(row):
+            if cell:
+                my_row += f" {i},{j}"
+        
+        comprised_map.append(my_row)
+		
+    return comprised_map	
+
 k=0
-while k < 3000:
+while k < 2000:
 	os.system("cls")
 	print(f"\033[1;32m number of maps generated: \033[1;31m {k} \033[0m")
  
-	x = map( 10 , 10 , 100 )
+	x = map( 3 ,3 , 100 )
 
 	data = {}
 
 	i=0
-	for row in x.map_key:
+	for row in comprise_data(x.map_key):
 		data[i] = row
 		i+=1
 	
