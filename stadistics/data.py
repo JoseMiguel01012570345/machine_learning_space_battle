@@ -37,7 +37,6 @@ def load():
 def tokenize_data( data:dict={} ,key_name:str = ""):
 
     len_row = data["row"]
-    len_column = data["column"]
     maps = {}
     
     simple_map = []
@@ -63,4 +62,3 @@ def load_file(path):
     reader.close()
     return json.loads(json_data)
 
-load()
