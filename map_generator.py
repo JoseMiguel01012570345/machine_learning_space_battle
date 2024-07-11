@@ -1,7 +1,5 @@
 import time,os,json
 
-
-
 class  map:
 
 	map_key = []
@@ -132,40 +130,57 @@ def comprise_data(map:list):
     
     comprised_map = []
     
+    len_row = 0
+    len_column = 0
+    
     for i,row in enumerate(map):
         
         my_row = ""
         for j,cell in enumerate(row):
             if cell:
-                my_row += f" {i},{j}"
+                my_row += f" {j}"
         
         comprised_map.append(my_row)
+    
+    len_row = len(map)
+    len_column = len(map[0])
+	
+    return comprised_map , len_row , len_column
+
+def generate_dataset():
+    
+	k=0
+	while k < 1000:
+		os.system("cls")
+		print(f"\033[1;32m number of maps generated: \033[1;31m {k} \033[0m")
+	
+		x = map( 3 ,3 , 100 )
+
+		comp_map , len_row , len_column = comprise_data(x.map_key)
+	
+		data = { "row": len_row , "column": len_column }
+
+		i=0
 		
-    return comprised_map	
+		for row in comp_map :
+			data[i] = row
+			i+=1
+		
+		file_path = f'./maps/map{k}.json'
 
-k=0
-while k < 2000:
-	os.system("cls")
-	print(f"\033[1;32m number of maps generated: \033[1;31m {k} \033[0m")
- 
-	x = map( 3 ,3 , 100 )
-
-	data = {}
-
-	i=0
-	for row in comprise_data(x.map_key):
-		data[i] = row
-		i+=1
+		# Open the file in write mode ('w')
+		with open( file_path , 'w') as file:
+			# Serialize the data to JSON and write it to the file
+			json.dump(data, file, indent=4)
+		
+		file.close()
 	
-	file_path = f'./maps/map{k}.json'
+		k += 1
 
-	# Open the file in write mode ('w')
-	with open( file_path , 'x') as file:
-		# Serialize the data to JSON and write it to the file
-		json.dump(data, file, indent=4)
-	
-	file.close()
-  
-	k += 1
-
-
+def extract_row_column( json_data ):
+    
+    len_row = json_data["row"]
+     
+    len_column = json_data["column"]
+    
+    return len_row , len_column
