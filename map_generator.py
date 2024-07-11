@@ -166,7 +166,7 @@ def generate_dataset():
 			data[i] = row
 			i+=1
 		
-		file_path = f'./maps/map{k}.json'
+		file_path = f'./MapsSet/map{k}.json'
 
 		# Open the file in write mode ('w')
 		with open( file_path , 'w') as file:
@@ -184,3 +184,5 @@ def extract_row_column( json_data ):
     len_column = json_data["column"]
     
     return len_row , len_column
+
+generate_dataset()

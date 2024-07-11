@@ -18,10 +18,6 @@ def change_path(path):
     DATA_PATH = Path(path)
     pass
 
-def parse_data(data):
-    new_data = data.replace('(','').replace(')','').split(',')
-    return int(new_data[0]),int(new_data[1])
-
 def load():
     """
     load all the data and returns it in a dictionary
@@ -33,9 +29,29 @@ def load():
             pos = name.index(file.suffix)
             key_name = name[:pos]
             data = load_file(file.resolve())
-            maps[key_name] = np.array([parse_data(value) for value in data])
+            print( f"\033[1;32m {key_name} \033[0m ")
+            maps[key_name] =tokenize_data( data=data , key_name=key_name )
         pass
     return maps
+
+def tokenize_data( data:dict={} ,key_name:str = ""):
+
+    len_row = data["row"]
+    len_column = data["column"]
+    maps = {}
+    
+    simple_map = []
+    
+    for i in range(len_row):
+        
+        column = data[ str(i) ].split(" ")[1:]
+        
+        for j in column :
+            
+            pair = ( i , int(j)  )
+            simple_map.append( pair )
+        
+    return np.array(maps)
 
 def load_file(path):
     """
@@ -46,3 +62,5 @@ def load_file(path):
     json_data = reader.read()
     reader.close()
     return json.loads(json_data)
+
+load()
