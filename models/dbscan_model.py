@@ -22,11 +22,11 @@ class DBSCANModelResult:
     _ami = None
     _ari = None
     
-    def __init__(self,model,data,clusters,tags=None):
+    def __init__(self,model,data,clusters,tags=[]):
         self._model = model
         self._clusters = clusters
         self._score = silhouette_score(data,clusters)
-        if tags:
+        if len(tags) > 0:
             self._homogeneity = homogeneity_score(tags,clusters)
             self._completness = completeness_score(tags,clusters)
             self._v_measure = v_measure_score(tags,clusters)
@@ -68,7 +68,7 @@ class DBSCANModelResult:
     
     pass
 
-def dbscan_signal_classifier(signals,tags=None,**kwargs):
+def dbscan_signal_classifier(features,tags=None,**kwargs):
     """
     returns an instance of LogisticRegressionModelResult class
     """
@@ -82,8 +82,7 @@ def dbscan_signal_classifier(signals,tags=None,**kwargs):
         min_samples = kwargs['min_samples']
         pass
     
-    signals_features = get_samples_features_vectors(signals)
-    scaled_data = SCALER.fit_transform(signals_features)
+    scaled_data = SCALER.fit_transform(features)
     db = DBSCAN(eps=0.5,min_samples=min_samples)
     clusters = db.fit_predict(scaled_data)
     return DBSCANModelResult(db,scaled_data,clusters,tags)

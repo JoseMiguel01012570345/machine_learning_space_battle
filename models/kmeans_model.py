@@ -32,7 +32,7 @@ class KMeansModelResult:
     
     pass
 
-def kmeans_signal_classifier(signals,**kwargs):
+def kmeans_signal_classifier(features,**kwargs):
     """
     returns an instance of LogisticRegressionModelResult class
     """
@@ -46,7 +46,6 @@ def kmeans_signal_classifier(signals,**kwargs):
         n_clusters = kwargs['n_clusters']
         pass
     
-    signals_features = get_samples_features_vectors(signals)
     kmeans = KMeans(n_clusters=n_clusters,random_state=42)
-    kmeans.fit(signals_features)
-    return KMeansModelResult(kmeans,signals_features)
+    kmeans.fit(features)
+    return KMeansModelResult(kmeans,features)

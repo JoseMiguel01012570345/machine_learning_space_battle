@@ -18,4 +18,7 @@ def matrix2signal(matrix):
     return matrix2canonics_coefs(matrix)
 
 def matrixs_array2signals_array(array):
-    return [matrix2signal(matrix) for matrix in array]
+    for matrix in array:
+        yield matrix2signal(matrix)
+        pass
+    pass

@@ -67,7 +67,7 @@ class LogisticRegressionModelResult:
     
     pass
 
-def logistic_regression_signal_classifier(signals,tags,**kwargs):
+def logistic_regression_signal_classifier(features,tags,**kwargs):
     """
     returns an instance of LogisticRegressionModelResult class
     """
@@ -85,8 +85,7 @@ def logistic_regression_signal_classifier(signals,tags,**kwargs):
         max_iter = kwargs['max_iter']
         pass
     
-    signals_features = get_samples_features_vectors(signals)
-    X_train,X_test,y_train,y_test = train_test_split(signals_features,tags,test_size=test_size,random_state=random_state)
+    X_train,X_test,y_train,y_test = train_test_split(features,tags,test_size=test_size,random_state=random_state)
     log_reg = LogisticRegression(max_iter=max_iter)
     log_reg.fit(X_train,y_train)
     return LogisticRegressionModelResult(log_reg,X_test,y_test)

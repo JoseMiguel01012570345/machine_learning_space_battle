@@ -137,7 +137,7 @@ def comprise_data(map:list):
         
         my_row = ""
         for j,cell in enumerate(row):
-            if cell:
+            if not cell:
                 my_row += f" {j}"
         
         comprised_map.append(my_row)
@@ -154,7 +154,7 @@ def generate_dataset():
 		os.system("cls")
 		print(f"\033[1;32m number of maps generated: \033[1;31m {k} \033[0m")
 	
-		x = map( 3 ,3 , 100 )
+		x = map( 18 ,18 , 57 )
 
 		comp_map , len_row , len_column = comprise_data(x.map_key)
 	

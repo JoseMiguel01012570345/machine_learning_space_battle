@@ -4,11 +4,8 @@ signal processing
 a module to work with matrix as signals
 """
 import numpy as np
-from scipy.linalg import svd
 from scipy.fft import fft
 from scipy.signal import spectrogram
-from scipy.fftpack import dct
-import librosa
 
 class SpectralFeatures:
     
@@ -27,7 +24,7 @@ class SpectralFeatures:
         return self._centroid
     
     @property
-    def Bandwith(self):
+    def Bandwidth(self):
         return self._bandwith
     
     @property
@@ -71,7 +68,7 @@ def spectral_bandwidth(freq):
     """
     returns the spectral bandwidth of the frequency
     """
-    return np.sqrt(np.sum(np.abs(freq[:-1])**2 * np.arange(len(freq[:-1]))**2)) / spectral_centroid(freq)
+    return np.sum(np.abs(freq[:-1])**2 * np.arange(len(freq[:-1]))**2) / (spectral_centroid(freq)**2)
 
 def spectral_rolloff(signal,percent=0.85,fs=1.0):
     """

@@ -17,8 +17,9 @@ from stadistics.visualization2D import change_path as ChangePathToImages2D
 from stadistics.visualization3D import change_path as ChangePathToImages3D
 from stadistics.visualization2D import IMAGE_PATH as IMAGE2D_PATH
 from stadistics.visualization3D import IMAGE_PATH as IMAGE3D_PATH
+from scipy.fft import fft
 
-DATASET = load()
+# DATASET = load()
 
 def MatrixEigenvaluesSignal(matrix):
     """
@@ -88,28 +89,45 @@ def SaveMatrixSpectres(matrix_array,shape,**kwargs):
     writer.close()
     pass
 
-def LoadMatrixSpectres(fname):
-    """
-    loads the spectres of the matrixs storeds in the given path
-    """
-    path = Path(fname)
-    if not path.exists or not path.is_file():
-        raise Exception('la ruta especificada no es valida')
-    if not path.suffix == '.json':
-        raise Exception('formato no valido')
-    reader = open(f'{path}','r')
-    content = reader.read()
-    reader.close()
-    try:
-        json_data = json.loads(content)
-        shape = tuple(json_data['shape'])
-        maps = {}
-        for key in json_data.keys():
-            if not key == 'shape':
-                maps[key] = [np.complex128(value) for value in json_data[key]]
-                pass
+def SaveSignalsSpectres(signals,path):
+    root = Path(path)
+    if not root.exists or root.is_dir():
+        raise Exception('la ruta especificad no es valida')
+    for i,signal in enumerate(signals):
+        freq = fft(signal)
+        data = []
+        for v in freq:
+            data.append((v.real,v.imag))
             pass
-        return shape,maps
-    except Exception as ex:
-        print('Error, formato no sorportado: {ex}')
-        return (-1,-1),{}
+        file_path = root.joinpath(f'map{i}.json')
+        file = open(file_path,'w')
+        file.write(json.dumps(data))
+        file.close()
+        pass
+    pass
+
+def LoadSignalsSpectres(path):
+    root = Path(path)
+    if not root.exists or root.is_file():
+        raise Exception('la ruta especificada no es valida')
+    freqs = []
+    for f in root.iterdir():
+        file = open(f'{f.resolve()}','r')
+        data = json.loads(file.read())
+        file.close()
+        freq = []
+        for value in data:
+            real = str(value[0])
+            imag = str(value[1])
+            n = ''
+            if imag.startswith('-'):
+                n = f'{real}{imag}j'
+                pass
+            else:
+                n = f'{real}+{imag}j'
+                pass
+            freq.append(np.complex128(n))
+            pass
+        freqs.append(freq)
+        pass
+    return np.array(freqs)

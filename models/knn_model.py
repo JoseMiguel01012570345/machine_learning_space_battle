@@ -67,7 +67,7 @@ class KNNModelResult:
     
     pass
 
-def knn_signal_classifier(signals,tags,**kwargs):
+def knn_signal_classifier(features,tags,**kwargs):
     """
     returns an instance of LogisticRegressionModelResult class
     """
@@ -85,8 +85,7 @@ def knn_signal_classifier(signals,tags,**kwargs):
         n_neighbors = kwargs['n_neighbors']
         pass
     
-    signals_features = get_samples_features_vectors(signals)
-    X_train,X_test,y_train,y_test = train_test_split(signals_features,tags,test_size=test_size,random_state=random_state)
+    X_train,X_test,y_train,y_test = train_test_split(features,tags,test_size=test_size,random_state=random_state)
     knn = KNeighborsClassifier(n_neighbors=n_neighbors)
     knn.fit(X_train,y_train)
     return KNNModelResult(knn,X_test,y_test)
