@@ -37,6 +37,7 @@ def dataset_train_validator():
 def classfier( y_true, y_pred ):
         os.system("cls")
         print(y_pred)
+        
         '''
         loss: Loss function. May be a string : name of loss function , or
         a tf.keras.losses.Loss instance. See tf.keras.losses. A loss function is any callable with the signature loss = fn(y_true, y_pred), 
