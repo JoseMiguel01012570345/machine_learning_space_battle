@@ -1,22 +1,23 @@
 """
-stadistics
+statistics
 
 a module to make stadistics analysis about a dataset saved in json format
 """
+
 import json
 import numpy as np
 from scipy.linalg import eig
 from os import getcwd
 from pathlib import Path
-from stadistics.data import load_file,load,DATA_PATH
-from stadistics.visualization2D import DispersionGraphic,Histogram,LinearGraphic,BlocksLinearGraphic,BarGraphic,BlocksDispersionGraphic,BlocksSpaceRelationGraphic,BoxPlotGraphic
-from stadistics.visualization3D import DispersionGraphic3D,BlocksDispersionGraphic3D,LinearGraphic3D,BlocksLinearGraphic3D
-from stadistics.preprocessing import BlocksToSignal,MatrixFFT,VisualizeFrequency
-from stadistics.data import change_path as ChangePathToData
-from stadistics.visualization2D import change_path as ChangePathToImages2D
-from stadistics.visualization3D import change_path as ChangePathToImages3D
-from stadistics.visualization2D import IMAGE_PATH as IMAGE2D_PATH
-from stadistics.visualization3D import IMAGE_PATH as IMAGE3D_PATH
+from statistics_ml.data import load_file,load,DATA_PATH
+from statistics_ml.visualization2D import DispersionGraphic,Histogram,LinearGraphic,BlocksLinearGraphic,BarGraphic,BlocksDispersionGraphic,BlocksSpaceRelationGraphic,BoxPlotGraphic
+from statistics_ml.visualization3D import DispersionGraphic3D,BlocksDispersionGraphic3D,LinearGraphic3D,BlocksLinearGraphic3D
+from statistics_ml.preprocessing import BlocksToSignal,MatrixFFT,VisualizeFrequency
+from statistics_ml.data import change_path as ChangePathToData
+from statistics_ml.visualization2D import change_path as ChangePathToImages2D
+from statistics_ml.visualization3D import change_path as ChangePathToImages3D
+from statistics_ml.visualization2D import IMAGE_PATH as IMAGE2D_PATH
+from statistics_ml.visualization3D import IMAGE_PATH as IMAGE3D_PATH
 from scipy.fft import fft
 
 # DATASET = load()

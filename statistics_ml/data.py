@@ -9,7 +9,7 @@ from pathlib import Path
 from os import getcwd
 import os
 
-ROOT_PATH = getcwd()
+ROOT_PATH = "../"
 DATA_PATH = Path(ROOT_PATH).joinpath('MapsSet')
 
 def change_path(path):
@@ -37,6 +37,7 @@ def load(total=None):
             # os.system("cls")   
             maps[key_name] =tokenize_data( data=data , key_name=key_name )
             if total == 0: break 
+            
         pass
     return maps
 

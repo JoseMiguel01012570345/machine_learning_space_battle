@@ -1,4 +1,4 @@
-from stadistics import load,BuildMatrix
+from statistics import load,BuildMatrix
 from models import *
 from scipy.fft import fft
 # from signals import mat

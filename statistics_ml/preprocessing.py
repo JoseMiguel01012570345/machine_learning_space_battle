@@ -5,7 +5,7 @@ a module to process the data
 """
 import numpy as np
 from scipy.fft import fft, fftfreq
-from stadistics import LinearGraphic
+from statistics import LinearGraphic
 import matplotlib.pyplot as plt
 
 def BlocksToSignal(blocks):

@@ -114,13 +114,26 @@ def visualize_training( autoencoder_train ):
 
 def use_model():
     
-    test_dir = './img_map_dataset/'
+    test_dir = './dataset_black_white/train/'
+    model = keras.models.load_model('autoencoder.h5')
     
     for img in range( len(os.listdir(test_dir))):
+        
+        image = cv2.imread( test_dir + f'{img}.jpg' , cv2.IMREAD_GRAYSCALE )
+        print(img)
+        
+        if image is None: continue
+        
+        test = image.reshape(1444,27,27)
     
-        test = cv2.imread('./dataset_balck_white/train/0.jpg').reshape(1444,27,27)
-        model = keras.load('autoencoder.h5')
-    
-    model.predict(test)
+        prediction = model.predict(test)
+
+        prediction.reshape( 1026 , 1026 )
+        
+        cv2.imshow( "prediction" , prediction )
+        cv2.waitKey(0)
+        input()
     
     pass
+
+use_model()
