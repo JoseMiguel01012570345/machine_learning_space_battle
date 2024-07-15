@@ -2,9 +2,12 @@ from data import load
 import cv2
 import numpy as np
 import os
+from map_generator import generate_dataset
 
 def build_img():
 
+    generate_dataset()
+    
     img_path = "../generator/dataset_black_white/train/0.jpg"
     maps = load()
     
@@ -20,7 +23,7 @@ def build_img():
             for j in range( np.size (img,1)):
                 img[i,j] = matrix[i,j]
 
-        cv2.imwrite(f"./img_map_dataset/{key}.jpg",img)
+        cv2.imwrite(f"../generator/img_map_dataset/{key}.jpg",img)
         
     return img
 

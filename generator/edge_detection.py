@@ -42,7 +42,6 @@ def image_edge_detection(image_path, train=True , replacement=""):
         binary_edges = cv2.bitwise_not(binary_edges)
     
     # Define the output filename
-    
     if train:
         print("./"+ replacement)
         cv2.imwrite("./" + replacement, binary_edges)
@@ -59,16 +58,16 @@ len_train_path = len(os.listdir(train_path))
 len_val_path = len(os.listdir(val_path))
 
 # save the train dataset 
-# for i in range(len_train_path):
+for i in range(len_train_path):
     
-#     if i < 9:
-#         image_edge_detection(f"{train_path}00{ i + 1 }.jpg" , replacement=f"{i}.jpg" )
-#     if i >= 10 and i < 99:
-#         image_edge_detection(f"{train_path}0{i + 1 }.jpg" , replacement=f"{i}.jpg" )
-#     if  i >= 100:
-#         image_edge_detection(f"{train_path}{i + 1}.jpg" , replacement=f"{i}.jpg" )
+    if i < 9:
+        image_edge_detection(f"{train_path}00{ i + 1 }.jpg" , replacement=f"{i}.jpg" )
+    if i >= 10 and i < 99:
+        image_edge_detection(f"{train_path}0{i + 1 }.jpg" , replacement=f"{i}.jpg" )
+    if  i >= 100:
+        image_edge_detection(f"{train_path}{i + 1}.jpg" , replacement=f"{i}.jpg" )
 
 
 # save the validation dataset 
-for i in range(len_val_path):
-    image_edge_detection( f"{val_path}{ i + 641 }.jpg" , False , replacement=f"{i}.jpg" )
+# for i in range(len_val_path):
+#     image_edge_detection( f"{val_path}{ i + 641 }.jpg" , False , replacement=f"{i}.jpg" )
