@@ -150,11 +150,11 @@ def comprise_data(map:list):
 def generate_dataset():
     
 	k=0
-	while k < 3:
+	while k < 1000:
 		os.system("cls")
 		print(f"\033[1;32m number of maps generated: \033[1;31m {k} \033[0m")
 	
-		x = map( 18 ,18 , 57 )
+		x = map( 38 ,38 , 27 )
 
 		comp_map , len_row , len_column = comprise_data(x.map_key)
 	

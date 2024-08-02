@@ -18,7 +18,7 @@ def get_samples_features_vectors(samples):
 def SaveSamplesFeatures(samples,good=True,path='./maps_features'):
     root = Path(path)
     if not root.exists or not root.is_dir():
-        raise Exception('la ruta no es valida')
+        raise Exception('no valid root')
     cont = 0
     for f in root.iterdir():
         cont += 1
@@ -40,7 +40,7 @@ def SaveSamplesFeatures(samples,good=True,path='./maps_features'):
 def LoadSamplesFeatures(path='./maps_features'):
     root = Path(path)
     if not root.exists or not root.is_dir():
-        raise Exception('la ruta no es valida')
+        raise Exception('no valid root')
     for f in root.iterdir():
         if not f.suffix == '.json': continue
         file = open(f'{f}','r')

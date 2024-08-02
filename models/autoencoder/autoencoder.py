@@ -1,4 +1,3 @@
-import keras
 from keras import layers
 from keras import Input
 from keras import Model
@@ -12,7 +11,7 @@ os.system("cls")
 
 def dataset_train_validator():
     
-    train_dir = './img_map_dataset/'
+    train_dir = './img_map_dataset2/'
     
     aux = []
     print("\033[1;32m loading training data \033[0m")
@@ -39,26 +38,28 @@ def dataset_train_validator():
 def autoencoder(input_img):
     
     # Encoder
-    x = layers.MaxPooling2D(pool_size=(171, 171))(input_img) 
-    x = layers.Conv2D(8 , (3,3) , padding='same', activation='relu')(x) 
+    x = layers.MaxPooling2D(pool_size=(6, 6))(input_img) 
+    x = layers.Conv2D(32 , (3,3) , padding='same', activation='relu')(x) 
     x = layers.Dense(32 , activation='relu')(x) 
     
-    x = layers.Conv2D(4 , (3,3) , padding='same', activation='relu')(x) 
+    x = layers.MaxPooling2D(pool_size=(3, 3))(x) 
+    x = layers.Conv2D(16 , (3,3) , padding='same', activation='relu')(x) 
     x = layers.Dense(16 , activation='relu')(x) 
     
     x = layers.MaxPooling2D(pool_size=(3, 3 ))(x) 
-    x = layers.Conv2D(2 , (3,3) , padding='same', activation='relu')(x) 
+    x = layers.Conv2D(8 , (3,3) , padding='same', activation='relu')(x) 
     encode = layers.Dense(8 , activation='relu')(x) 
     
     #decoder
     x = layers.UpSampling2D((3,3))(encode) 
-    x = layers.Conv2D(2 , (3,3) , padding='same' , activation='relu' )(x)
+    x = layers.Conv2D(4 , (3,3) , padding='same' , activation='relu' )(x)
+    x = layers.Dense(4, activation='relu')(x) 
+    
+    x = layers.UpSampling2D((3,3))(x) 
+    x = layers.Conv2D(8 , (2,2) , padding='same' , activation='relu' )(x)
     x = layers.Dense(8, activation='relu')(x) 
     
-    x = layers.Conv2D(4 , (2,2) , padding='same' , activation='relu' )(x)
-    x = layers.Dense(16, activation='relu')(x) 
-    
-    x = layers.UpSampling2D((171,171))(x) 
+    x = layers.UpSampling2D((6,6))(x) 
     decoded = layers.Dense(1, activation='relu')(x) 
     
     return decoded    

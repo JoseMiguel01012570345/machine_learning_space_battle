@@ -1,8 +1,8 @@
-# from keras import models
+from keras import models
 import numpy as np
 import os
 import cv2
-import json
+os.system('cls')
 
 def use_model():
     
@@ -17,9 +17,9 @@ def use_model():
         if image is None: continue
         
         # original
-        # print(image.shape)
-        # cv2.imshow( "original" , image )
-        # cv2.waitKey(0)
+        print(image.shape)
+        cv2.imshow( "original" , image )
+        cv2.waitKey(0)
         
         image = image.reshape( 1 , 1026 , 1026 )
         prediction =  model.predict(image)
@@ -46,36 +46,4 @@ def process_result(prediction:np.array):
         
     return prediction
 
-def test():
-    
-    path = '../MapsSet/'
-    
-    data = []
-    for img in range( len(os.listdir(path))):
-        
-        file = open(path + f"/map{img}.json")
-        json_file:dict = json.load(file)
-        json_file.pop('row')
-        json_file.pop('column')
-        data.append( json_file )
-
-    pass
-
-    for index,item_map in enumerate(data):
-        
-        number_black = 0
-        for row in item_map:
-            
-            new = item_map[row].split(' ')
-            
-            if len(new) == 1: continue
-            
-            number_black +=len(new)
-        
-        print(f"map{index}: {number_black}" )
-        
-
-test()
-
-# use_model()
-
+use_model()

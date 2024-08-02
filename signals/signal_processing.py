@@ -10,6 +10,7 @@ from scipy.signal import spectrogram
 class SpectralFeatures:
     
     def __init__(self,signal):
+        
         self._freq = fft(signal)
         self._centroid = spectral_centroid(self._freq)
         self._bandwith = spectral_bandwidth(self._freq)
@@ -17,6 +18,7 @@ class SpectralFeatures:
         self._contrast = spectral_contrast(signal)
         self._ones_average = np.mean(signal)
         self._average = np.sum(signal)
+        
         pass
     
     @property
@@ -95,8 +97,6 @@ def spectral_flatness(signal,fs=1.0):
     total_energy = np.sum(Sxx)
     mean_energy = np.mean(Sxx)
     return np.sqrt(total_energy / mean_energy)
-
-
 
 def get_signal_features(signal):
     """

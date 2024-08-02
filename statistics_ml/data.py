@@ -33,8 +33,9 @@ def load(total=None):
             pos = name.index(file.suffix)
             key_name = name[:pos]
             data = load_file(file.resolve())
+            
             print( f"\r\033[1;32m {key_name} \033[0m ")
-            # os.system("cls")   
+            
             maps[key_name] =tokenize_data( data=data , key_name=key_name )
             if total == 0: break 
             

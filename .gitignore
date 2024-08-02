@@ -2,6 +2,11 @@
 /node_modules
 /dataset
 /maps_features
-/generator/dataset_black_white
-/generator/img_map_dataset
-/generator/dataset_in_color
+/models/reinforcement_effort/dataset_black_white
+/models/reinforcement_effort/dataset_img_json
+/models/reinforcement_effort/base
+/models/autoencoder/img_map_dataset2
+/models/autoencoder/img_map_dataset
+/models/autoencoder/dataset_qtable
+/models/autoencoder/dataset_black_white
+test.py

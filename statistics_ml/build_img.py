@@ -1,4 +1,4 @@
-from data import load
+import data 
 import cv2
 import numpy as np
 import os
@@ -6,10 +6,10 @@ from map_generator import generate_dataset
 
 def build_img():
 
-    generate_dataset()
+    # generate_dataset()
     
     img_path = "../generator/dataset_black_white/train/0.jpg"
-    maps = load()
+    maps = data.load()
     
     # Open the image file
     img = cv2.imread(img_path)
