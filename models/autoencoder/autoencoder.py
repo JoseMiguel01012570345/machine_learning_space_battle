@@ -20,7 +20,6 @@ def load_data( number ):
         
         file= open( train_dir + json_data , 'r' ).read()
         tok = tokenize_data(json_data=file)
-        tok = tok.flatten()
         aux.append( tok )
         
         pass
@@ -29,8 +28,8 @@ def load_data( number ):
     
     file= open( val_dir + f'image{ number }.json' , 'r' ).read()
     val = tokenize_data(json_data=file)
-    
     val = val.flatten()
+    
     train_data_y = np.array([ val for i in range(len(train_data_x)) ])
     
     # 80% of training
@@ -56,24 +55,35 @@ def tokenize_data(json_data):
     
     return image
 
-def network(input_img):
+def network():
     
     # Encoder
-    model = models.Sequential()
-
-    # Add layers to the model
-    model.add(input_img)
-
-    # Example: Adding a Dense layer with 64 units and ReLU activation
-    model.add(layers.Dense(4, activation='relu'))
-    model.add(layers.Dense(4, activation='relu'))
-    model.add(layers.Dense(4, activation='relu'))
-    model.add(layers.Dense(4, activation='relu'))
-    model.add(layers.Dense(4, activation='relu'))
-
-    # Final layer for output
-    # Assuming it's a binary classification, use a single unit with sigmoid activation
-    model.add(layers.Dense(1, activation='sigmoid'))
+    model = models.Sequential([
+    
+    layers.Input( shape=( 800 , 600 , 1 ) ),
+    layers.MaxPooling2D((25, 20) ),
+    
+    # First convolutional layer
+    layers.Conv2D(16, (3, 3), padding='same' ,  activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    
+    # Second convolutional layer
+    layers.Conv2D(32, (3, 3), padding='same' , activation='relu'),
+    layers.MaxPooling2D((2, 3)),
+    
+    # Third convolutional layer
+    layers.Conv2D(32, (3, 3), padding='same' , activation='relu'),
+    
+    # Fourth convolutional layer
+    layers.Conv2D(32, (3, 3), padding='same' ,activation='relu'),
+    
+    layers.Dense(512, activation='relu'), 
+    layers.Dense(12000, activation='relu'),    
+    # Flattening the 3D output to 1D before feeding it into the dense layer
+    layers.Flatten(),
+    
+    # Dense layers for classification    
+    ])
     
     return model
 
@@ -81,24 +91,25 @@ def engine():
 
     print("\033[1;32m building model \033[0m")
     
-    input_img = Input( shape=( 800 * 600 , 1 ) )
-    
     # Create a new model for classification
-    auto_encoder = network(input_img=input_img)
+    auto_encoder = network()
     
     # Summary of the model
     auto_encoder.summary()
     
     print("\033[1;32m compiling model \033[0m")
     
-    auto_encoder.compile(optimizer= 'Adam',
-                            loss='binary_crossentropy',
+    auto_encoder.compile(optimizer= 'adam',
+                            loss='mse',
                             metrics=['accuracy'])
     
     epochs = 4
     history = None
     
+    breaking = 1
     for i in range( len(os.listdir('./dataset/train/') )):
+        
+        if i != breaking: continue
         
         train_data_x , val_data_y = load_data(i)
         
@@ -106,7 +117,6 @@ def engine():
         
         history = auto_encoder.fit(train_data_x['train_x'] , train_data_x['train_y'] , batch_size=1, epochs=epochs,verbose=1 , validation_data=(val_data_y['val_x'] , val_data_y['val_y'] ) , use_multiprocessing=True )
         
-        break    
     
     auto_encoder.save('autoencoder_shape=1026x1026.h5')  # Creates a HDF5 file 'my_model.h5'
     
