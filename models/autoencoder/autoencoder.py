@@ -1,103 +1,118 @@
 from keras import layers
 from keras import Input
-from keras import Model
+from keras import models
+from keras import optimizers
 import numpy as np
-import cv2
 import matplotlib as plt
 from matplotlib import pyplot as plt
-
+import json
 import os
 os.system("cls")
 
-def dataset_train_validator():
+def load_data( number ):
     
-    train_dir = './img_map_dataset2/'
+    train_dir = f'./dataset/train/dataset{number}/'
+    val_dir=f'./dataset/val/dataset{number}/'
     
     aux = []
-    print("\033[1;32m loading training data \033[0m")
-    for img in range( len(os.listdir(train_dir))):
+    print(f"\033[1;32m loading training data {train_dir} \033[0m")
+    for json_data in os.listdir(train_dir):
         
-        image = cv2.imread(train_dir + f"/map{img}.jpg", cv2.IMREAD_GRAYSCALE)
+        file= open( train_dir + json_data , 'r' ).read()
+        tok = tokenize_data(json_data=file)
+        tok = tok.flatten()
+        aux.append( tok )
         
-        if image is None:
-            continue
+        pass
         
-        image = image.astype(np.float32) / 255
-        aux.append(image)
+    train_data_x = np.stack( aux, axis=0)
     
-    data = np.stack( aux, axis=0)
+    file= open( val_dir + f'image{ number }.json' , 'r' ).read()
+    val = tokenize_data(json_data=file)
+    
+    val = val.flatten()
+    train_data_y = np.array([ val for i in range(len(train_data_x)) ])
+    
+    # 80% of training
+    train = { "train_x": train_data_x[ 0 : int( len(train_data_x) * .8 ) ] , "train_y": train_data_y[ 0 : int( len(train_data_y) * .8 ) ] }
+    
+    # 20% of validation
+    val = { "val_x": train_data_x[ int( len(train_data_x) * .8 ) :  ] , "val_y": train_data_y[ int( len(train_data_y) * .8 ) : ] }
 
-    num_train = int(len(os.listdir(train_dir)) * 0.8)
-    
-    train_data = data[ 0 : num_train ]
-    val_data = data[ num_train: ]
-    
-    
-    return train_data , val_data
+    return train , val
 
-def autoencoder(input_img):
+def tokenize_data(json_data):
+    
+    data = json.loads(json_data)
+    
+    image = np.ones((800,600))
+    
+    for i,row in enumerate(data):
+        
+        token_row = data[row].split(' ')[1:-1]
+        for item in token_row:
+            
+            image[int(item),i] = 0
+    
+    return image
+
+def network(input_img):
     
     # Encoder
-    x = layers.MaxPooling2D(pool_size=(6, 6))(input_img) 
-    x = layers.Conv2D(32 , (3,3) , padding='same', activation='relu')(x) 
-    x = layers.Dense(32 , activation='relu')(x) 
+    model = models.Sequential()
+
+    # Add layers to the model
+    model.add(input_img)
+
+    # Example: Adding a Dense layer with 64 units and ReLU activation
+    model.add(layers.Dense(4, activation='relu'))
+    model.add(layers.Dense(4, activation='relu'))
+    model.add(layers.Dense(4, activation='relu'))
+    model.add(layers.Dense(4, activation='relu'))
+    model.add(layers.Dense(4, activation='relu'))
+
+    # Final layer for output
+    # Assuming it's a binary classification, use a single unit with sigmoid activation
+    model.add(layers.Dense(1, activation='sigmoid'))
     
-    x = layers.MaxPooling2D(pool_size=(3, 3))(x) 
-    x = layers.Conv2D(16 , (3,3) , padding='same', activation='relu')(x) 
-    x = layers.Dense(16 , activation='relu')(x) 
-    
-    x = layers.MaxPooling2D(pool_size=(3, 3 ))(x) 
-    x = layers.Conv2D(8 , (3,3) , padding='same', activation='relu')(x) 
-    encode = layers.Dense(8 , activation='relu')(x) 
-    
-    #decoder
-    x = layers.UpSampling2D((3,3))(encode) 
-    x = layers.Conv2D(4 , (3,3) , padding='same' , activation='relu' )(x)
-    x = layers.Dense(4, activation='relu')(x) 
-    
-    x = layers.UpSampling2D((3,3))(x) 
-    x = layers.Conv2D(8 , (2,2) , padding='same' , activation='relu' )(x)
-    x = layers.Dense(8, activation='relu')(x) 
-    
-    x = layers.UpSampling2D((6,6))(x) 
-    decoded = layers.Dense(1, activation='relu')(x) 
-    
-    return decoded    
+    return model
 
 def engine():
-        
+
     print("\033[1;32m building model \033[0m")
     
-    train_data , val_data = dataset_train_validator()
+    input_img = Input( shape=( 800 * 600 , 1 ) )
     
-    # Input shape: (batch_size, 28, 28, 1)
-    input_img = Input(shape=( 1026, 1026 , 1 ))
-
     # Create a new model for classification
-    auto_encoder = Model(inputs=input_img, outputs=autoencoder(input_img))
+    auto_encoder = network(input_img=input_img)
     
     # Summary of the model
     auto_encoder.summary()
-
-    # Compile the model
     
     print("\033[1;32m compiling model \033[0m")
     
     auto_encoder.compile(optimizer= 'Adam',
-                             loss='mean_squared_error',
-                             metrics=['accuracy'])
+                            loss='binary_crossentropy',
+                            metrics=['accuracy'])
+    
+    epochs = 4
+    history = None
+    
+    for i in range( len(os.listdir('./dataset/train/') )):
+        
+        train_data_x , val_data_y = load_data(i)
+        
+        print(f"\033[1;32m fitting model {i} \033[0m")
+        
+        history = auto_encoder.fit(train_data_x['train_x'] , train_data_x['train_y'] , batch_size=1, epochs=epochs,verbose=1 , validation_data=(val_data_y['val_x'] , val_data_y['val_y'] ) , use_multiprocessing=True )
+        
+        break    
+    
+    auto_encoder.save('autoencoder_shape=1026x1026.h5')  # Creates a HDF5 file 'my_model.h5'
+    
+    return history , epochs
 
-    epochs = 5
-    
-    print("\033[1;32m fitting model \033[0m")
-    
-    autoencoder_train = auto_encoder.fit(train_data , train_data , batch_size=1,epochs=epochs,verbose=1,validation_data=(val_data,val_data))
-    
-    auto_encoder.save('autoencoder_shape_1026.h5')  # Creates a HDF5 file 'my_model.h5'
-    
-    return autoencoder_train , epochs
-
-def visualize_training( autoencoder_train  ,epochs ):
+def visualize_training( autoencoder_train , epochs ):
 
     loss = autoencoder_train.history['loss']
     val_loss = autoencoder_train.history['val_loss']

@@ -53,3 +53,6 @@ Non-trainable params: 0 (0.00 Byte)
 ##
 ### Loss: 0.1148 <-> accuracy: 0.7667
 _________________________________________________________________
+
+- $\left(\frac{W - P}{S} + 1, \frac{H - Q}{T} + 1, D\right)$
+- $\text{Accuracy} = \frac{\text{Number of Correct Predictions}}{\text{Total Number of Predictions}}$
