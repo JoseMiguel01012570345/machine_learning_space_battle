@@ -19,11 +19,11 @@ def use_model():
         # image = add_gaussian_noise(image=image)
         img = image
         image = normalize(image)
-
+        
         image = image.reshape( 1 , 800 * 600 )
         prediction =  model.predict(image)
         prediction = prediction.reshape( 600 , 800 )
-        
+        print(prediction.shape)
         prediction = adjust_img(prediction=prediction)
         
         cv2.imshow( "orgininal" , img )

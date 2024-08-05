@@ -55,20 +55,39 @@ def add_gaussian_noise(image, sigma=15):
 def apply_noise():
     
     path = './base/'
+    path_satellite_train='./satellital_img/train/'
     
     for index, item in enumerate(os.listdir(path)):
         
         img = cv2.imread(path + item , cv2.IMREAD_GRAYSCALE )
+        img = np.resize( img , (1019,750) )
+        print(img.shape)
+        cv2.imshow( 'img' , img )
+        cv2.waitKey(0)
         
         folder_val_path = f'./dataset/val/dataset{index}/image{index}.json'
         
-        for i in range(400):
+        for k,element in enumerate(os.listdir(path_satellite_train)):
             
-            noisy_img= add_gaussian_noise( img )
-            folder_train_path = f'./dataset/train/dataset{index}/image{i}.json'
-            convert_img_json( folder_path=folder_train_path , image=noisy_img )
-        
+            satellital_img = cv2.imread(path_satellite_train + element , cv2.IMREAD_GRAYSCALE )
+            satellital_img = np.resize( satellital_img , (600,800) )
+            cv2.imshow('satellital_img',satellital_img)
+            cv2.waitKey(0)
+            
+            for i in range(5):
+                
+                for j in range(15):
+                    
+                    noisy_img= add_gaussian_noise( img , i ) + satellital_img
+                    folder_train_path = f'./dataset/train/dataset{index}/image{ i + j + k }.json'
+                    convert_img_json( folder_path=folder_train_path , image=noisy_img )
+                    
+                    cv2.imshow('noisy_img',noisy_img)
+                    cv2.waitKey(0)
+            
         convert_img_json(image=img , folder_path=folder_val_path )
+        
+        break
         
     pass
 
