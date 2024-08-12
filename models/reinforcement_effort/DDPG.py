@@ -37,7 +37,7 @@ class Buffer:
         # Instead of list of tuples as the exp.replay concept go
         # We use different np.arrays for each tuple element
         self.state_buffer = np.zeros((self.buffer_capacity, num_states))
-        self.action_buffer = np.zeros((self.buffer_capacity, 1))
+        self.action_buffer = np.zeros((self.buffer_capacity, num_actions))
         self.reward_buffer = np.zeros((self.buffer_capacity, 1))
         self.next_state_buffer = np.zeros((self.buffer_capacity, num_states))
 
@@ -97,9 +97,11 @@ class Buffer:
             critic_value = critic_model([state_batch, actions], training=True)
             # Used `-value` as we want to maximize the value given
             # by the critic for our actions
-            actor_loss = -tf.reduce_mean(critic_value)
+            actor_loss = tf.reduce_mean(tf.abs(critic_value))
+            
             # print("actor_loss:", actor_loss.numpy() )
             # print('----------------------------------------------------')
+            
         actor_grad = tape.gradient(actor_loss, actor_model.trainable_variables)
         actor_optimizer.apply_gradients(
             zip(actor_grad, actor_model.trainable_variables)
@@ -136,13 +138,13 @@ def update_target(target, original, tau):
     
 def get_actor():
     # Initialize weights between -3e-3 and 3-e3
-    last_init = keras.initializers.RandomUniform(minval=-3e-3, maxval=3e-3)
+    last_init = keras.initializers.RandomUniform(minval=1.0, maxval=2.0)
 
     inputs = layers.Input(shape=(num_states,))
-    out = layers.Dense(4, activation="tanh")(inputs)
-    outputs = layers.Dense(1, activation="softmax", kernel_initializer=last_init)(out)
+    out = layers.Dense(4, activation="relu")(inputs)
+    outputs = layers.Dense( num_actions , activation="softmax", kernel_initializer=last_init)(out)
 
-    outputs = outputs * upper_bound
+    outputs = (outputs * upper_bound - 1) * -1
     model = keras.Model(inputs, outputs)
     return model
 
@@ -154,7 +156,7 @@ def get_critic():
     state_out = layers.Dense(4, activation="relu")(state_out)
 
     # Action as input
-    action_input = layers.Input(shape=(1,))
+    action_input = layers.Input(shape=(num_actions,))
     action_out = layers.Dense(2, activation="relu")(action_input)
 
     # Both are passed through separate layer before concatenating
@@ -178,7 +180,7 @@ def policy(state):
     # We make sure action is within bounds
     legal_action = np.clip(sampled_actions, lower_bound, upper_bound)
     
-    return [np.squeeze(legal_action)]
+    return np.squeeze(legal_action)
 
 actor_model = get_actor()
 critic_model = get_critic()
