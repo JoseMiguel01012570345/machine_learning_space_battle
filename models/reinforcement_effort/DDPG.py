@@ -37,7 +37,7 @@ class Buffer:
         # Instead of list of tuples as the exp.replay concept go
         # We use different np.arrays for each tuple element
         self.state_buffer = np.zeros((self.buffer_capacity, num_states))
-        self.action_buffer = np.zeros((self.buffer_capacity, num_actions))
+        self.action_buffer = np.zeros((self.buffer_capacity, 1))
         self.reward_buffer = np.zeros((self.buffer_capacity, 1))
         self.next_state_buffer = np.zeros((self.buffer_capacity, num_states))
 
@@ -82,8 +82,8 @@ class Buffer:
             critic_loss = tf.reduce_mean(tf.square(y - critic_value))
             
             # os.system('cls')
-            # print('----------------------------------------------------')
-            # print("critic_loss:",critic_loss.numpy())
+            print('----------------------------------------------------')
+            print("critic_loss:",critic_loss.numpy())
             
         critic_grad = tape.gradient(critic_loss, critic_model.trainable_variables)
         critic_optimizer.apply_gradients(
@@ -97,10 +97,9 @@ class Buffer:
             critic_value = critic_model([state_batch, actions], training=True)
             # Used `-value` as we want to maximize the value given
             # by the critic for our actions
-            actor_loss = tf.reduce_mean(tf.abs(critic_value))
-            
-            # print("actor_loss:", actor_loss.numpy() )
-            # print('----------------------------------------------------')
+            actor_loss = -tf.reduce_mean(critic_value)
+            print("actor_loss:", actor_loss.numpy() )
+            print('----------------------------------------------------')
             
         actor_grad = tape.gradient(actor_loss, actor_model.trainable_variables)
         actor_optimizer.apply_gradients(
@@ -141,10 +140,10 @@ def get_actor():
     last_init = keras.initializers.RandomUniform(minval=1.0, maxval=2.0)
 
     inputs = layers.Input(shape=(num_states,))
-    out = layers.Dense(4, activation="relu")(inputs)
-    outputs = layers.Dense( num_actions , activation="softmax", kernel_initializer=last_init)(out)
+    out = layers.Dense(2, activation="tanh")(inputs)
+    outputs = layers.Dense(1, activation="relu", kernel_initializer=last_init)(out)
 
-    outputs = (outputs * upper_bound - 1) * -1
+    outputs = outputs * upper_bound
     model = keras.Model(inputs, outputs)
     return model
 
@@ -156,7 +155,7 @@ def get_critic():
     state_out = layers.Dense(4, activation="relu")(state_out)
 
     # Action as input
-    action_input = layers.Input(shape=(num_actions,))
+    action_input = layers.Input(shape=(1,))
     action_out = layers.Dense(2, activation="relu")(action_input)
 
     # Both are passed through separate layer before concatenating
@@ -173,6 +172,7 @@ def get_critic():
 def policy(state):
     
     act =actor_model(state)
+    # print(act.numpy())
     sampled_actions = tf.squeeze(act)
 
     sampled_actions = sampled_actions.numpy()
@@ -180,7 +180,7 @@ def policy(state):
     # We make sure action is within bounds
     legal_action = np.clip(sampled_actions, lower_bound, upper_bound)
     
-    return np.squeeze(legal_action)
+    return [np.squeeze(legal_action)]
 
 actor_model = get_actor()
 critic_model = get_critic()
@@ -225,7 +225,7 @@ for ep in range(total_episodes):
         action = policy(tf_prev_state)
         # Receive state and reward from environment.
         state, reward, done, truncated, _ = env.step(action)
-
+        
         buffer.record((prev_state, action, reward, state))
         episodic_reward += reward
 
@@ -246,6 +246,7 @@ for ep in range(total_episodes):
     avg_reward = np.mean(ep_reward_list[-40:])
     print("Episode * {} * Avg Reward is ==> {}".format(ep, avg_reward))
     avg_reward_list.append(avg_reward)
+
 
 # Plotting graph
 # Episodes versus Avg. Rewards

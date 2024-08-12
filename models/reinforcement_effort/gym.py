@@ -39,8 +39,8 @@ class map_2d:
                                     axis=0
                             ).flatten() 
     
-    upper_bound = 1.0
-    lower_bound = 0.0
+    upper_bound = len(action_space.flatten()) - 1
+    lower_bound = 0
     
     black = False
     last_action = 0
@@ -79,13 +79,13 @@ class map_2d:
         cv2.imshow('kk',self.observation_space)
         cv2.waitKey(0)
         
-    def step(self , actions ):
+    def step(self , action ):
         
         '''
-        return: reward, done, truncated
+        return: state, reward, done, truncated
         
         '''
-        rw , done , truncated = self.apply_action( actions )
+        rw , done , truncated = self.apply_action( action )
         
         array = np.array(pygame.surfarray.array3d(self.surface))
         
@@ -114,72 +114,42 @@ class map_2d:
         
         pygame.display.update()
 
-    def apply_action(self , actions ):
+    def apply_action(self , action ):
 
         '''
         action ={ 'w':int , 'h':int , 'value':int }
         
         '''
-        actions_to_apply = []
-        max_val = 0
-        for index , action in enumerate(actions.tolist()):
-            
-            if max_val < action: max_val = action
-            if action >= .8:
-                actions_to_apply.append(index)
-         
-        print(max_val)
+        action = action[0]
 
-        if actions_to_apply.__contains__(math.nan) :
-            print( "danger" )
+        if not (action >=0 and action <= self.upper_bound ):
+            print( "danger:", action)
             return -100000 , 0 , 1
         
-        truncate = 1
-        done = 0
-        rw = -1
-        for action in actions_to_apply:
-            
-            if self.observation_space[self.action_space[action]['column'], self.action_space[action]['row']][0] == self.action_space[action]['value']:
-                rw =-action
-                print( self.action_space[action] , action , f"reward:{rw}" )
-                return  rw , 0 , 1
+        action = int(action)
         
-            self.observation_space[self.action_space[action]['column'], self.action_space[action]['row']] = self.action_space[action]['value']
-            
-            rw1 , done1 , truncate1 = self.reward( action=action )
-            
-            if truncate1 == 0:
-                truncate = 0
-            else:
-                truncate += truncate1
-                
-            rw += rw1
-            done += done1
+        if self.observation_space[self.action_space[action]['column'], self.action_space[action]['row']][0] == self.action_space[action]['value']:
+            rw = action - self.upper_bound
+            print( self.action_space[action] , action , f"reward:{rw}" )
+            return  rw , 0 , 1
         
-        if done > 0 : done = 1
-        if truncate > 0: truncate = 1
+        self.observation_space[self.action_space[action]['column'], self.action_space[action]['row']] = self.action_space[action]['value']
         
-        return rw , done , truncate
+        return self.reward( action=action )
     
     def reward(self , action ):
         
-        print(self.action_space[action])
-        
         if self.action_space[action]['value'] == 255.0 and not self.black :
             
-            rw = action
+            rw =   action - self.upper_bound
             
-            print( self.action_space[action] , action , f"reward:{ rw }" )
+            # print( self.action_space[action] , action , f"reward:{ rw }" )
             return rw , 0 , 0
         
-        # if self.action_space[action]['value'] == 1 and self.black :
-        #     print( self.action_space[action] , action , f"reward:{-100000}" )
-        #     return -100000 , 0 , 0
-        
-        rw = -action
-        print( self.action_space[action] , action , f"reward:{rw}" )
+        rw = action
+        # print( self.action_space[action] , action , f"reward:{rw}" )
         
         return rw , 0 , 0
     
 def make():
-    return map_2d('./dataset_black_white/train/600.jpg')
+    return map_2d('./dataset_black_white/train/1.jpg')
