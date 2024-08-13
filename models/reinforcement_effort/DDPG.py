@@ -81,7 +81,7 @@ class Buffer:
             
             critic_loss = tf.reduce_mean(tf.square(y - critic_value))
             
-            # os.system('cls')
+            os.system('cls')
             print('----------------------------------------------------')
             print("critic_loss:",critic_loss.numpy())
             
@@ -136,7 +136,7 @@ def update_target(target, original, tau):
     target.set_weights(target_weights)
     
 def get_actor():
-    # Initialize weights between -3e-3 and 3-e3
+    # Initialize weights between 1 and 2
     last_init = keras.initializers.RandomUniform(minval=1.0, maxval=2.0)
 
     inputs = layers.Input(shape=(num_states,))
@@ -156,7 +156,7 @@ def get_critic():
 
     # Action as input
     action_input = layers.Input(shape=(1,))
-    action_out = layers.Dense(2, activation="relu")(action_input)
+    action_out = layers.Dense(1, activation="relu")(action_input)
 
     # Both are passed through separate layer before concatenating
     concat = layers.Concatenate()([state_out, action_out])

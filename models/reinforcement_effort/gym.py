@@ -14,6 +14,8 @@ class map_2d:
         img = cv2.imread( path , cv2.IMREAD_GRAYSCALE )
         self.white_or_black(img=img)
         
+        self.write_in_file('','w')
+        
         pygame.init()
         screen_width = 1026
         screen_height = 700
@@ -78,7 +80,14 @@ class map_2d:
     def show(self):
         cv2.imshow('kk',self.observation_space)
         cv2.waitKey(0)
+    
+    def write_in_file(self , text , mode='a'):
         
+        file = open("./list_actions.txt", mode )
+        file.write(f"{text} \n")
+        
+        pass
+    
     def step(self , action ):
         
         '''
@@ -123,14 +132,17 @@ class map_2d:
         action = action[0]
 
         if not (action >=0 and action <= self.upper_bound ):
-            print( "danger:", action)
-            return -100000 , 0 , 1
+            
+            rw = -100000
+            self.write_in_file(f"danger: {action} , reward:{rw}")
+            return rw , 0 , 1
         
         action = int(action)
         
         if self.observation_space[self.action_space[action]['column'], self.action_space[action]['row']][0] == self.action_space[action]['value']:
+            
             rw = action - self.upper_bound
-            print( self.action_space[action] , action , f"reward:{rw}" )
+            self.write_in_file( f"{self.action_space[action]} {action} reward:{rw}" )
             return  rw , 0 , 1
         
         self.observation_space[self.action_space[action]['column'], self.action_space[action]['row']] = self.action_space[action]['value']
@@ -143,11 +155,11 @@ class map_2d:
             
             rw =   action - self.upper_bound
             
-            # print( self.action_space[action] , action , f"reward:{ rw }" )
+            self.write_in_file( f"{self.action_space[action]} {action} reward:{rw}" )
             return rw , 0 , 0
         
         rw = action
-        # print( self.action_space[action] , action , f"reward:{rw}" )
+        self.write_in_file( f"{self.action_space[action]} {action} reward:{rw}" )
         
         return rw , 0 , 0
     
