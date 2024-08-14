@@ -36,7 +36,7 @@ class map_2d:
 
     sample = np.array([])
     observation_space = np.array( [ [ j for j in range(20)] for i in range(20) ] )
-    action_space = np.concatenate( (np.array( [ [ { 'value': 255.0 , 'row':i , 'column': j  } for j in range(20) ] for i in range(20) ]) ,
+    action_space = np.concatenate( (np.array( [ [ { 'value': 1.0 , 'row':i , 'column': j  } for j in range(20) ] for i in range(20) ]) ,
                                     np.array( [ [ { 'value': 0.0 , 'row':i , 'column': j  } for j in range(20) ] for i in range(20) ] )),
                                     axis=0
                             ).flatten() 
@@ -45,7 +45,8 @@ class map_2d:
     lower_bound = 0
     
     black = False
-    last_action = 0
+    col_axis = -1
+    row_axis = 0
     
     def white_or_black( self , img: np.array ):
         
@@ -57,7 +58,7 @@ class map_2d:
             return
         
         self.black = True
-        
+    
     def reset(self):
         
         '''
@@ -67,26 +68,31 @@ class map_2d:
         self.patch_x_size = 20
         self.patch_y_size = 20
         
-        self.col_axis = random.randint( 0 , int(self.sample.shape[0] / self.patch_x_size) - 1 )
-        self.row_axis = random.randint( 0 , int(self.sample.shape[1] / self.patch_y_size) - 1 )
+        if self.col_axis == self.sample.shape[0] - self.patch_x_size:
+            
+            self.col_axis = 0
+            self.row_axis += 1
+            
+            if self.row_axis == self.sample.shape[1] - self.patch_y_size:
+                self.row_axis = 0
+        else:
+            self.col_axis += 1 
+            
+        new_sample = np.array( [ [ self.sample[self.col_axis + j , self.row_axis + i ] for j in range(self.patch_x_size) ] for i in range(self.patch_y_size)  ] ).astype('uint8')
+        self.observation_space = np.where( new_sample > 128.0 , 1.0 , 0.0 ) # extract next patch from sample
         
-        arr_random = np.array( [ [ self.sample[self.col_axis * self.patch_x_size + j , self.row_axis * self.patch_y_size + i ] for j in range(self.patch_x_size) ] for i in range(self.patch_y_size)  ] ).astype('uint8')
-        self.observation_space = np.where( arr_random > 128.0 , 1.0 , 0.0 )
-        
-        # self.show()    
+        # self.show()
         
         return self.observation_space.flatten() , None
     
     def show(self):
-        cv2.imshow('kk',self.observation_space)
+        cv2.imshow('kk',self.observation_space * 255.0 )
         cv2.waitKey(0)
     
-    def write_in_file(self , text , mode='a'):
+    def write_in_file(self , text , mode='a'): # list of actions taken
         
         file = open("./list_actions.txt", mode )
         file.write(f"{text} \n")
-        
-        pass
     
     def step(self , action ):
         
@@ -94,16 +100,19 @@ class map_2d:
         return: state, reward, done, truncated
         
         '''
+        
         rw , done , truncated = self.apply_action( action )
         
-        array = np.array(pygame.surfarray.array3d(self.surface))
+        self.sample = np.array(pygame.surfarray.array3d(self.surface))
         
+        # paste patch in sample to render
         for i in range(self.patch_y_size):
             for j in range(self.patch_x_size):
-                array[ self.col_axis * self.patch_x_size + i , self.row_axis * self.patch_y_size + j] = self.observation_space[j,i][0] * 255.0
+                self.sample[ self.col_axis + i , self.row_axis + j] = self.observation_space[j,i][0] * 255.0
         
-        self.surface = pygame.surfarray.make_surface( array )
+        self.surface = pygame.surfarray.make_surface( self.sample )
         self.render( surface=self.surface )
+        # self.show()
         
         return self.observation_space.flatten() , rw , done , truncated , None
 
@@ -134,15 +143,16 @@ class map_2d:
         if not (action >=0 and action <= self.upper_bound ):
             
             rw = -100000
-            self.write_in_file(f"danger: {action} , reward:{rw}")
+            self.write_in_file(f"danger: {action} , reward:{rw}") # record action in file
             return rw , 0 , 1
         
         action = int(action)
         
+        # check if action is useless
         if self.observation_space[self.action_space[action]['column'], self.action_space[action]['row']][0] == self.action_space[action]['value']:
             
             rw = action - self.upper_bound
-            self.write_in_file( f"{self.action_space[action]} {action} reward:{rw}" )
+            self.write_in_file( f"{self.action_space[action]} {action} reward:{rw}" ) # record action in file
             return  rw , 0 , 1
         
         self.observation_space[self.action_space[action]['column'], self.action_space[action]['row']] = self.action_space[action]['value']
@@ -151,7 +161,7 @@ class map_2d:
     
     def reward(self , action ):
         
-        if self.action_space[action]['value'] == 255.0 and not self.black :
+        if self.action_space[action]['value'] == 1.0 and not self.black :
             
             rw =   action - self.upper_bound
             

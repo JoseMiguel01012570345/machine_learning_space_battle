@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Specify the `render_mode` parameter to show the attempts of the agent in a pop up window.
+metric = 0
 env = gym.make()
 
 num_states = len(env.observation_space.flatten())
@@ -134,7 +135,22 @@ def update_target(target, original, tau):
         target_weights[i] = original_weights[i] * tau + target_weights[i] * (1 - tau)
 
     target.set_weights(target_weights)
+
+def save_models():
     
+    folder_path = f'./map_types/metric{metric}' 
+    
+    if not os.path.exists(folder_path):
+        os.mkdir(folder_path)
+    
+    # Assuming actor_model and critic_model are already defined and trained
+    # Save the actor model
+    actor_model.save( folder_path +"/" +'actor_model.h5' )
+
+    # Save the critic model
+    critic_model.save( folder_path + "/" +'critic_model.h5' )
+    
+
 def get_actor():
     # Initialize weights between 1 and 2
     last_init = keras.initializers.RandomUniform(minval=1.0, maxval=2.0)
@@ -146,7 +162,6 @@ def get_actor():
     outputs = outputs * upper_bound
     model = keras.Model(inputs, outputs)
     return model
-
 
 def get_critic():
     # State as input
