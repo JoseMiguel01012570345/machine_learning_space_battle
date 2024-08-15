@@ -98,7 +98,7 @@ class Buffer:
             critic_value = critic_model([state_batch, actions], training=True)
             # Used `-value` as we want to maximize the value given
             # by the critic for our actions
-            actor_loss = -tf.reduce_mean(critic_value)
+            actor_loss = tf.reduce_mean( critic_value )
             print("actor_loss:", actor_loss.numpy() )
             print('----------------------------------------------------')
             
@@ -150,13 +150,14 @@ def save_models():
     # Save the critic model
     critic_model.save( folder_path + "/" +'critic_model.h5' )
     
-
 def get_actor():
     # Initialize weights between 1 and 2
+    import random
+    
     last_init = keras.initializers.RandomUniform(minval=1.0, maxval=2.0)
 
     inputs = layers.Input(shape=(num_states,))
-    out = layers.Dense(2, activation="tanh")(inputs)
+    out = layers.Dense(3, activation="tanh")(inputs)
     outputs = layers.Dense(1, activation="relu", kernel_initializer=last_init)(out)
 
     outputs = outputs * upper_bound
@@ -214,7 +215,7 @@ actor_lr = 0.001
 critic_optimizer = keras.optimizers.Adam(critic_lr)
 actor_optimizer = keras.optimizers.Adam(actor_lr)
 
-total_episodes = 300
+total_episodes = 1000000
 # Discount factor for future rewards
 gamma = 0.99
 # Used to update target networks
