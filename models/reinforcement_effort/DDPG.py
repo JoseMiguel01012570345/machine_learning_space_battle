@@ -94,11 +94,10 @@ class Buffer:
         with tf.GradientTape() as tape:
             
             actions = actor_model(state_batch, training=True)
-                        
-            critic_value = critic_model([state_batch, actions], training=True)
+            
             # Used `-value` as we want to maximize the value given
             # by the critic for our actions
-            actor_loss = tf.reduce_mean( critic_value )
+            actor_loss = tf.reduce_mean( upper_bound - actions )
             print("actor_loss:", actor_loss.numpy() )
             print('----------------------------------------------------')
             
@@ -238,7 +237,7 @@ for ep in range(total_episodes):
             tf.convert_to_tensor(prev_state), 0
         )
 
-        action = policy(tf_prev_state)
+        action = policy(tf_prev_state)[0]
         # Receive state and reward from environment.
         state, reward, done, truncated, _ = env.step(action)
         
