@@ -89,6 +89,9 @@ update_target_network = 100
 # Using huber loss for stability
 loss_function = keras.losses.mae
 
+model_target = model_target.compile( optimizer=optimizer , loss = loss_function)
+model = model_target.compile( optimizer=optimizer , loss = loss_function)
+
 avg_loss = 10000000
 loss_list = []
 max_memory_loss = 100
@@ -188,12 +191,14 @@ try:
                             
                             # os.system('cls')
                             loss_list.append( loss.numpy() )
-                            print("loss:", loss.numpy() )
                             
                             if max_memory_loss <= len(loss_list):
                                 loss_list = loss_list[1:]
-                                avg_loss = np.mean(np.array( loss_list ))
                             
+                            avg_loss = np.mean(np.array( loss_list ))
+                            print('______________________________________')
+                            print("avg_loss:", avg_loss )
+                            print("loss:", loss.numpy() )
                             
                         # Backpropagation
                         grads = tape.gradient( loss , model.trainable_variables)
@@ -244,9 +249,6 @@ except Exception as e:
     thread =threading.Thread(target=save_model)
     thread.start()
     thread.join()
-
-# saving model
-model_target.save('model_target.hs')
 
 # plotting results
 import matplotlib.pyplot as plt

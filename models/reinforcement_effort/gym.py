@@ -49,9 +49,12 @@ class map_2d:
         
         sample_path = './dataset_black_white/train' # list samples
         for sample in os.listdir(sample_path):
-            self.sample_list.append( cv2.imread(sample_path + '/'+ sample , cv2.IMREAD_GRAYSCALE ) )
+            self.sample_list.append( cv2.imread(sample_path + '/'+ sample ) )
         
         self.len_sample = len(self.sample_list)
+        
+        self.new_size=( 1026 , 700 )
+        self.screen = pygame.display.set_mode( self.new_size )
     
     def white_or_black( self ):
         
@@ -65,6 +68,7 @@ class map_2d:
         self.black = True
     
     def next(self):
+        
         self.iterator += 1
         
         if self.iterator > self.len_sample: self.iterator = 0
@@ -90,7 +94,7 @@ class map_2d:
                 self.col_axis = random.randint( 0 , self.sample.shape[0] - self.patch_x_size - 1 )
                 self.row_axis = random.randint( 0 , self.sample.shape[1] - self.patch_y_size - 1 ) 
     
-        new_sample = np.array( [ [ self.sample[self.col_axis + j , self.row_axis + i ] for j in range(self.patch_x_size) ] for i in range(self.patch_y_size)  ] ).astype('uint8')
+        new_sample = np.array( [ [ self.sample[self.col_axis + j , self.row_axis + i ][0] for j in range(self.patch_x_size) ] for i in range(self.patch_y_size)  ] ).astype('uint8')
         self.observation_space = np.where( new_sample > 128.0 , 1.0 , 0.0 ) # extract next patch from sample
         
         # self.observation_space = np.zeros( self.observation_space.shape )
@@ -123,15 +127,17 @@ class map_2d:
         rw , done , truncated , modified = self.apply_action( action )
         
         # apply action
-        if modified: self.sample[ self.col_axis + column , self.row_axis + row] = value * 255.0
+        if modified: self.sample[ self.col_axis + column , self.row_axis + row][0] = value * 255.0
         
+        surface = pygame.surfarray.make_surface( self.sample )
+        self.render(surface=surface)
         cv2.imwrite( './record.jpg' , self.observation_space * 255.0 )
-        # cv2.imwrite('./sample.jpg' , self.sample )
         
         return self.observation_space , rw , done , truncated , None
 
     def render(self , surface ):
-                
+        
+        surface =pygame.transform.scale( surface , self.new_size )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 
@@ -139,11 +145,7 @@ class map_2d:
                 return
             
         self.screen.fill((0, 0, 0))
-        
-        self.noisy_surface = surface
-        
-        self.screen.blit(self.noisy_surface, (0, 0))
-        
+        self.screen.blit(surface , (0, 0))
         pygame.display.update()
 
     def apply_action(self , action ): # action ={ 'w':int , 'h':int , 'value':int }
