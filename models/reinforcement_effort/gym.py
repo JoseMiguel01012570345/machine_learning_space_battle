@@ -12,12 +12,16 @@ class map_2d:
     def __init__(self) -> None:
         
         self.init_var()
-        self.write_in_file('','w')
+        self.write_in_file('','w' )
+        self.write_in_file('','w' , file_path='./sample_number' )
+    
         
     def init_var(self):
         
+        self.done = False
         self.best_rw = 0
         self.sample = np.array([])
+        self.reset_time = 0
         
         self.patch_x_size = 100
         self.patch_y_size = 100
@@ -49,12 +53,14 @@ class map_2d:
         
         sample_path = './dataset_black_white/train' # list samples
         for sample in os.listdir(sample_path):
+            
+            if len(self.sample_list) == 300:break
             self.sample_list.append( cv2.imread(sample_path + '/'+ sample ) )
         
         self.len_sample = len(self.sample_list)
         
-        self.new_size=( 1026 , 700 )
-        self.screen = pygame.display.set_mode( self.new_size )
+        # self.new_size=( 1026 , 700 )
+        # self.screen = pygame.display.set_mode( self.new_size )
     
     def white_or_black( self ):
         
@@ -70,8 +76,12 @@ class map_2d:
     def next(self):
         
         self.iterator += 1
+        self.done = False
+        self.reset_time = 0
         
-        if self.iterator > self.len_sample: self.iterator = 0
+        self.write_in_file(f"sample ==>{ self.iterator }" , file_path='./sample_number')
+        
+        if self.iterator >= self.len_sample: self.iterator = 0
         
         self.sample = self.sample_list[ self.iterator ]
         self.white_or_black()
@@ -82,24 +92,33 @@ class map_2d:
         returns random state
         
         '''
+        
+        window_x = 30
+        window_y = 30
+        
+        self.reset_time +=1 
+        
         self.best_rw = 0
-        self.col_axis += 30 
+        self.col_axis += window_x
         
         if self.col_axis >= self.sample.shape[0] - self.patch_x_size:
             
-            self.col_axis = random.randint( 0 , self.sample.shape[0] - self.patch_x_size - 1 )
-            self.row_axis = random.randint( 0 , self.sample.shape[1] - self.patch_y_size - 1 ) 
-            
-            if self.row_axis == self.sample.shape[1] - self.patch_y_size:
-                self.col_axis = random.randint( 0 , self.sample.shape[0] - self.patch_x_size - 1 )
-                self.row_axis = random.randint( 0 , self.sample.shape[1] - self.patch_y_size - 1 ) 
-    
+            self.col_axis = 0
+            self.row_axis += window_y
+        
+            if self.row_axis >= self.sample.shape[1] - self.patch_y_size:
+                self.done = True
+                self.row_axis =0
+                self.col_axis = 0
+                
         new_sample = np.array( [ [ self.sample[self.col_axis + j , self.row_axis + i ][0] for j in range(self.patch_x_size) ] for i in range(self.patch_y_size)  ] ).astype('uint8')
         self.observation_space = np.where( new_sample > 128.0 , 1.0 , 0.0 ) # extract next patch from sample
         
+        progress =f"progress in sample { self.iterator } ==>{ self.reset_time / int((self.sample.shape[0] * self.sample.shape[1])/(window_x * window_y)) * 100 }"
+        
         # self.observation_space = np.zeros( self.observation_space.shape )
         
-        return self.observation_space , None
+        return self.observation_space , progress , None
     
     def show(self):
         cv2.imshow('kk',self.observation_space * 255.0 )
@@ -129,9 +148,9 @@ class map_2d:
         # apply action
         if modified: self.sample[ self.col_axis + column , self.row_axis + row][0] = value * 255.0
         
-        surface = pygame.surfarray.make_surface( self.sample )
-        self.render(surface=surface)
-        cv2.imwrite( './record.jpg' , self.observation_space * 255.0 )
+        # surface = pygame.surfarray.make_surface( self.sample )
+        # self.render(surface=surface)
+        # cv2.imwrite( './record.jpg' , self.observation_space * 255.0 )
         
         return self.observation_space , rw , done , truncated , None
 
@@ -185,7 +204,7 @@ class map_2d:
         
         # self.write_in_file( f"{self.action_space[action]} {action} reward:{ best_match }" ) # record action in file
         
-        return best_match , 0 , 0 , modified
+        return best_match , self.done , 0 , modified
     
     def matrix_cosine_similarity( self,  matrix_a, matrix_b):
         
