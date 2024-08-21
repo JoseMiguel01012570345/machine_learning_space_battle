@@ -1,8 +1,5 @@
 import os
-
-# os.system('cls') 
 os.environ["KERAS_BACKEND"] = "tensorflow"
-import threading
 
 import keras
 from keras import layers
