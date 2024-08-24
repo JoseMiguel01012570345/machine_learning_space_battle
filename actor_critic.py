@@ -7,6 +7,7 @@ from keras import layers
 import gym
 import numpy as np
 import tensorflow as tf
+import time
 
 # Configuration parameters for the whole setup
 seed = 42
@@ -52,11 +53,11 @@ def save_model():
 
 # The first model makes the predictions for Q-values which are used to
 # make a action.
-model = create_q_model(observation_space)
+model = keras.models.load_model('./model_target')
 # Build a target model for the prediction of future rewards.
 # The weights of a target model get updated every 10000 steps thus when the
 # loss between the Q-values is calculated the target Q-value is stable.
-model_target = create_q_model(observation_space)
+model_target = keras.models.load_model('./model_target')
 
 # In the Deepmind paper they use RMSProp however then Adam optimizer
 # improves training time
@@ -96,6 +97,9 @@ epsilon_loss = 1e-3
 epochs = 2
 best_avg_loss = 100000000
 avg_count = 0
+benchmark_avg_loss = 1000000
+benchmark_loss = 1000000
+avg_time_action = []
 
 for epoch in range(epochs):
     
@@ -129,7 +133,11 @@ for epoch in range(epochs):
                 epsilon = max(epsilon, epsilon_min)
 
                 # Apply the sampled action in our environment
+                act_time = time.time()
                 state_next, reward, done, truncated , _ = env.step(action)
+                result_time = time.time() - act_time
+                avg_time_action.append(result_time)
+                
                 state_next = np.array(state_next)
 
                 episode_reward += reward
@@ -199,16 +207,30 @@ for epoch in range(epochs):
                             best_avg_loss = avg_loss.T
                             avg_count += 1
                             save_model()
-                            
+                        
+                        if benchmark_avg_loss > avg_loss:
+                            benchmark_avg_loss = avg_loss
+                        
+                        if benchmark_loss > loss.numpy():
+                            benchmark_loss = loss.numpy()
+                        
                         # show progress
                         os.system('cls')
                         print('______________________________________')
                         print(f"{progress}%")
-                        print("model_version=", avg_count )
-                        print("avg_loss:", avg_loss )
-                        print("loss:", loss.numpy() )
+                        print("model version=", avg_count )
                         
-                            
+                        print('______________________________________')
+                        print("avg_loss:", avg_loss )
+                        print("benchmark avg loss:", benchmark_avg_loss )
+                        
+                        print('______________________________________')
+                        print("loss:", loss.numpy() )
+                        print("benchmark loss:", benchmark_loss )
+                        print('______________________________________')
+                        print('avg time action:' , sum(avg_time_action )/len(avg_time_action) )
+                        avg_time_action.pop(0)
+                        
                     # Backpropagation
                     grads = tape.gradient( loss , model.trainable_variables)
                     optimizer.apply_gradients(zip(grads, model.trainable_variables))

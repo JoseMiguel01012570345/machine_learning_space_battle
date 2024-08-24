@@ -1,8 +1,6 @@
 import numpy as np
 import cv2
 import os
-import random
-import math
 import pygame 
 
 os.system('cls')
@@ -49,7 +47,7 @@ class map_2d:
         
         self.len_sample = 0
         self.sample_list = []
-        self.iterator = -1
+        self.iterator = 1
         
         sample_path = './dataset_black_white/train' # list samples
         for sample in os.listdir(sample_path):
@@ -58,10 +56,8 @@ class map_2d:
             self.sample_list.append( cv2.imread(sample_path + '/'+ sample ) )
         
         self.len_sample = len(self.sample_list)
+        self.similarity_queue = []
         
-        # self.new_size=( 1026 , 700 )
-        # self.screen = pygame.display.set_mode( self.new_size )
-    
     def white_or_black( self ):
         
         img = np.where( self.sample > 128 , 1.0 , 0.0 )
@@ -183,9 +179,9 @@ class map_2d:
         self.observation_space[ column , row ] = value
         
         best_match = 0
+        
         for patch in self.patches: # best match by cosine similarity
-            similarity = self.matrix_cosine_similarity( patch , self.observation_space )
-            
+            similarity = self.matrix_cosine_similarity(patch , self.observation_space)
             if similarity > best_match:
                 best_match = similarity
         
@@ -200,8 +196,7 @@ class map_2d:
         else:
             self.best_rw = best_match
             modified = True
-            # print( "best reward ==> ", self.best_rw )
-        
+            
         # self.write_in_file( f"{self.action_space[action]} {action} reward:{ best_match }" ) # record action in file
         
         return best_match , self.done , 0 , modified
@@ -240,8 +235,9 @@ class map_2d:
             s = np.dot(normalized_vector_a, normalized_vector_b)
             total_sum += s
             
-        # Return the cosine similarity
+        # enqueue cosine similarity
+        # self.similarity_queue.append(total_sum / matrix_a.shape[0])
         return total_sum / matrix_a.shape[0]
-
+    
 def make():
     return map_2d()
