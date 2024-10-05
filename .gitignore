@@ -6,3 +6,5 @@
 test.py
 /__pycache__
 /models
+/model_pattern_recog
+/data

@@ -51,6 +51,23 @@ Para lograrlo, entrenaremos un modelo de aprendizaje por refuerzo que interactú
 
 ## Propuestas de solución
 
+Para dar una mejor expreriencia de usuario mientras mas exahustivos seamos en el analisis de similitud de entre dos imagenes mejor , pero toma mas tiempo de aprendizaje. Por tanto la imagen original la divideremos en pedazos de 100x100 desplazados 30 pixeles hacia la derecha y hacia, esto nos da un total de 1170 pequeñas imagenes que debemos modificar de la imagen original. La razon por la que escogemos estas pequenas imagenes con este desplazamiento es porque queremos un solapamiento gadual entre ellas para q exista un conitnuidad en las prediciones que se hacen , es decir si hay bloques en linea recta en la imagen A , queremos que el patron de la imagen B tenga en cuentra el patron de la imagen A.
+
+#### Discusion sobre que modelo utilizar
+
+Este problema se puede enfocar bajo otras perspectivas:
+
+1. Detencion de imagenes o trozos de una imagen sobre una imagen satelital
+2. Reconstruccion de la imagen objetivo dada una imagen satelital
+3. Fine Tunning de modelos que resuelvan los problemas de arriba
+
+##### Propuesta 1
+Nuestro problema no queda resulto plantenadonos el problema de esta forma , debido a que podemos tener una imagen statelital en la que no existe ningun objeto del dataset , por tanto no se puede detectar nada , y el resultado es 0 area de similitud
+
+##### Propuesta 2
+En esta propuesta podemos avanzar mas , pero , qué queremos corregir en la imagen original ? Si interpretamos los pixeles sobrantes de la comparativa entre imagenes de 100x100 de la imagen original y de la queremos hallar , podremos reducir este ruido . Existen muchas formas de ruido en una imagen , y modelo tambien , pero los modelos de hoy en dia no son capaces de lidiar con el 100% de las formas de error en una imagen , por ejemplo , modelos de auto-enconder. Un encoder es capaz de aprender predicados en un dataset de imagenes y un decoder es utilizado para "evaluarlo" , de ahi auto-enconder , modelos como este son una buena opcion para lidiar con errores gaussianos , pero este tipo de errores no son tan comunes en la realidad , y por tanto para que llegue a ser util en algunos casos , debemos utilizar tecnicas muy avanzadas o modelos muy grandes. En nuestro problema debemos utilizar un modelo tan robusto que sea capaz de lidiar con la gran mayoria de los errores, puesto que podemos encontrarnos con toda clase de imagenes satelitales , desde superficies rugosas a superficies con alto grado de homogeneidad , como es el caso de las dunas de arenas en desiertos o el agua tranquila de un lago .Un opcion pudiera tratarse de un trasformer , este tipo de modelo hace aprendizaje sobre la correlacion que entre la entrada y la salida.
+
+
 Utilizamos aprendizaje por refuerzo, un sistema que interactúa con un entorno dinámico para aprender a través de la exploración y la explotación de conocimientos previamente adquiridos. El agente aprende a maximizar una medida de recompensa acumulada a través de la interacción con su entorno.
 
 ### Componentes Clave de un Agente RL
