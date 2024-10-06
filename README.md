@@ -256,19 +256,37 @@ Disponiamos de una memoria RAM de 16 GB de 4800 M/T (DDR5) y un microprocesador 
 
 ### Agente interactuando en un espacio estatico
 
-Usamos una estrategia muy comun en este enfoque que es generar acciones de forma aleatoria he ir entrenando el modelo baso en tales decisiones, hasta un punto en el que el modelo pueda comenzar a tomar decisiones por si mismo. La razon de este enfoque esta dada porque en la practica a menudo se experimenta que el modelo no es capaz de explorar el espacio en las primeras etapas del entrenamiento, por tanto debemos forzarlo , en nuestro caso sin esta heuristica, pudimos ver largas horas de aprendizaje y el modelo parecia mantenerse en el mismo lugar , como si de tomar una unica decision se tratase. Variamos el ritmo de aprendizaje y el look-ahead del modelo pero aun asi no hacia muchos cambios, aunque pudimos apreciar que si cambiabamos el imagen de entrada , el modelo se esforzaba por tomar decisiones diferentes.
+Utilizamos una estrategia común en este enfoque, que consiste en generar acciones de forma aleatoria y entrenar el modelo en función de tales decisiones, hasta alcanzar un punto en el que el modelo pueda comenzar a tomar decisiones por sí mismo. La razón detrás de este enfoque se basa en la observación práctica de que, a menudo, el modelo no es capaz de explorar adecuadamente el espacio de soluciones en las primeras etapas del entrenamiento. Por lo tanto, es necesario forzarlo a hacerlo.
 
-Este enfoque brido muy pocos resultados , desde imagenes monotonas a imagenes con un unico color, blanco o negro , aunque en algunos casos modificaba la imagen original con algun que otro pixel negro. Sin embargo no respetaba las restriciones impuestas definidas en las politicas de recompenza , como respetar la predominacia del color , y menos aun creaba patrones interesantes. Imagenes con un punto en el medio de cada recorte de 100x100 que se le hacia pasar. En la etapa de entrenamiento , el modelo apenas disminuye la funcion de perdida a pesar de ser entrenando por 15 dias con google-colab.
+#### Observaciones Durante el Entrenamiento
+
+En nuestro caso, sin esta heurística, observamos que el modelo podía pasar largas horas en proceso de aprendizaje sin mostrar avances significativos, como si se limitara a tomar una única decisión. A pesar de variar el ritmo de aprendizaje y el look-ahead del modelo, los cambios en el rendimiento eran mínimos. Sin embargo, notamos que al modificar la imagen de entrada, el modelo se esforzaba por tomar decisiones diferentes.
+
+Este enfoque produjo resultados limitados, generando imágenes que variaban desde representaciones monótonas hasta imágenes de un único color, ya sea blanco o negro. En algunos casos, se observó que el modelo modificaba la imagen original al introducir algún píxel negro. Sin embargo, el modelo no cumplió con las restricciones definidas en las políticas de recompensa, como la necesidad de respetar la predominancia del color. Además, no logró crear patrones interesantes; por ejemplo, las imágenes resultantes presentaban un punto en el centro de cad 100×100.
+
+#### Desempeño del Modelo
+
+Durante la etapa de entrenamiento, el modelo mostró una disminución mínima en la función de pérdida, a pesar de haber sido entrenado durante 15 días en Google Colab. Esto sugiere que el enfoque actual no es efectivo para lograr los objetivos deseados y requiere una revisión y optimización para mejorar su rendimiento y adherencia a las políticas establecidas.
 
 ### Reduccion de ruido en la imagen original
 
 #### Auto-encoder resultados:
 
-El modelo de auto-encoder solo generaba salidas costantes que variaba entre una imagen totalment en negro , en blanco o extamente la misma imagen. Este ultimo resultado parecia alentador, pero resulto en que el modelo se comportaba como una funcion identidad. Intentamos con varios dataset.
+El modelo de autoencoder generaba salidas constantes que variaban entre una imagen completamente negra, una imagen completamente blanca, o la misma imagen de entrada. Aunque el último resultado parecía alentador, en realidad indicaba que el modelo se comportaba como una función identidad. Se realizaron pruebas con varios conjuntos de datos.
 
-Las imagenes iniciales que usamos eran generadas , y tenian una propiedad en comun, y es que el histograma de escalas gris daba blanco en el $76$% de los pixeles es decir, pixeles cuyo valor era 255. Y la funcion de perdida del modelo era del .24 , lo cual , si a eso le sumamos que la salida eran imagenes en blanco, concluimos que el modelo estaba funcionando aparentemente bien debido a tal propiedad. Al cambiar el dataset , por imagenes reales , solo obtuvimos la misma imagen de entrada. Por tanto solo podian pasar dos cosas, o la arquitectura era incorrecta o faltaba entrenamiento, sin embargo entrenamos el modelo con 1000 epocas y los resultados seguian siendo los mismos. Solo algunas arquitecturas podiamos usar dado que al aumentar el numero de neuronas aumenta el tamano del modelo y exige mas computo. De todas las arquitecutas probadas que entraban en la memoria ram, ninguna dio resultados diferentes.
+##### Análisis de los Datos Iniciales
 
-Intentamos usar google-colab intentando variar la arquitectas y la cantidad de entrenamiento , pero este tampoco dio resultados diferentes. Por tanto pensamos en otro enfoque de aprendizaje.
+Las imágenes iniciales utilizadas eran generadas y compartían una propiedad común: el histograma de escalas de grises mostraba que el 76% de los píxeles tenían un valor de 255 (blanco). La función de pérdida del modelo se situaba en 0.24, lo que, sumado a la predominancia de imágenes en blanco, llevó a la conclusión errónea de que el modelo estaba funcionando adecuadamente debido a esta característica.
+
+Al cambiar el conjunto de datos por imágenes reales, solo se obtuvo la misma imagen de entrada como salida. Esto sugiere que podían ocurrir dos situaciones: o bien la arquitectura del modelo era incorrecta, o faltaba entrenamiento. Sin embargo, a pesar de entrenar el modelo durante 1000 épocas, los resultados continuaron siendo los mismos.
+
+#### Limitaciones Arquitectónicas
+
+Se limitaron las arquitecturas utilizables, ya que aumentar el número de neuronas incrementa el tamaño del modelo y exige más recursos computacionales. De todas las arquitecturas probadas que podían ser alojadas en la memoria RAM, ninguna produjo resultados diferentes.
+
+#### Intentos Adicionales y Nuevas Estrategias
+
+Se intentó utilizar Google Colab para variar las arquitecturas y la cantidad de entrenamiento, pero este enfoque tampoco arrojó resultados distintos. Por lo tanto, se consideró necesario explorar un nuevo enfoque de aprendizaje.
 
 ### Mulimodal resultados:
 
@@ -323,8 +341,11 @@ En la ruta `gallery` hay un total de 150 pares input , ouput de las pruebas util
 
 
 
-La razón por la que hay una línea que no parece pertenecer a la imagen original en la imagen de salida es porque la resolución del imagen es de 1026x1026 y se tomaron ventanas contiguas de izquierda a derecha y de arriba a abajo de 100x100 , por lo que sobra un pedazo de 26x1026 en el caso de columna mas a la derecha y 1026x26 en el caso de la fila más al fondo.
+La razón por la cual hay una línea que no parece pertenecer a la imagen original en la imagen de salida se debe a la resolución de la imagen, que es de 1026×1026 píxeles. Durante el procesamiento, se tomaron ventanas contiguas de 100×100 píxeles, tanto de izquierda a derecha como de arriba hacia abajo.
 
+#### Problema de Recorte
+
+Este método de extracción de ventanas deja un área residual no procesada: un segmento de 26×1026 píxeles en el caso de la columna más a la derecha y un segmento de 1026×26 píxeles en el caso de la fila más inferior. Esta área adicional es responsable de la aparición de líneas o bordes en la imagen de salida que no corresponden a la imagen original.
 
 ## Discusión de los resultados
 
