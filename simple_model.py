@@ -217,6 +217,8 @@ def train_model(use = 0, version=0 , img:np.array=None):
             y_train = y_train[indices]
             
             mean_precision = [ ]
+            l_loss = []
+            l_val_loss = []
             while i < len( x_train ): # adjust weight of the model
                 
                     
@@ -251,7 +253,7 @@ def train_model(use = 0, version=0 , img:np.array=None):
                     print( 'loss: ',loss.numpy()[0] )
                     m.save_model(model=model , filepath=f'./model_v{number}')
                 
-                history['loss'].append(loss.numpy()[0])
+                l_loss.append(loss.numpy()[0])
                 i += 1
             
             i = 0
@@ -276,13 +278,15 @@ def train_model(use = 0, version=0 , img:np.array=None):
                     print( f'sample_val: {i}/{len(x_val)}' )
                     print( 'loss: ',loss.numpy()[0] )
                     
-                history['loss'].append(loss.numpy()[0])
+                l_val_loss.append(loss.numpy()[0])
                 i += 1
             
             val_loss = np.array(val_loss)
             if val_loss.mean(0) <= epsilon_stop: break
         
-    
+            history['loss'].append(np.mean(np.array(l_loss)))
+            history['val_loss'].append(np.mean(np.array(l_val_loss)))
+
         # plotting results
         plt.subplot(1, 2, 1)
         plt.plot(history['loss'], label='Training Loss')
@@ -292,10 +296,10 @@ def train_model(use = 0, version=0 , img:np.array=None):
         plt.ylabel('Loss')
         plt.legend()
         plt.tight_layout()
-        plt.savefig('./report.png')
+        plt.savefig(f'./report_model{number}.png')
         plt.close()
 
-    for i in range( 12 , num ):
+    for i in range( num ):
         train(number=i)
     
 def start_generation(num):

@@ -3,7 +3,6 @@ import keras.layers as layers
 import numpy as np
 import os
 import cv2
-from signals import *
 import tensorflow as tf
 
 
@@ -142,7 +141,7 @@ def train_selector():
             plt.close()
             
         x_train ,  y_train ,  x_val , y_val = [] ,[] , [] , []
-        
+                 
 def use_model( x:np.array= None  , model_list:list = [] ):
     
     best_similarity = 1e305
