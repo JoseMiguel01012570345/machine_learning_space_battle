@@ -62,7 +62,7 @@ La normalización de la imagen se realizó mediante el siguiente procedimiento: 
 - Antes vs. Después
 
 !['aero']( 002.jpg )
-!['aero']( dataset_black_white/train/1.jpg )
+!['aero']( IMG_20241007_084706_689.jpg )
 
 
 #### Enfoques y Técnicas en Aprendizaje Automático
