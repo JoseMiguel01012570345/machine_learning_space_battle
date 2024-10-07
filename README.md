@@ -329,7 +329,7 @@ Los resultados de esta via fueron bastante diferentes y buenos en general , abaj
 
 En estos gráficos se puede apreciar que las curvas de los modelos convergen en el mismo punto a partir de la época 20. Aquí la condición de parada de entrenamineto de cada modelo fue un épsilon ajustado experimentalmente de la pérdida promedio en la fase de validación, tal épsilon es $5·1e$-$3$ , para épsilon más bajos el modelo no parecía converger , puesto que pasaba de las 200 épocas
 
-En la ruta `gallery` hay un total de 150 pares input , ouput de las pruebas utilizadas con esta vía, y como dicho antes, el mejor resultado obtenido.
+En la ruta `gallery` hay un total de 10 pares input , ouput de las pruebas utilizadas con esta vía, y como dicho antes, el mejor resultado obtenido.
 
 
 !['modelo13']( ./gallery/101I.jpg 'input')

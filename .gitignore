@@ -8,3 +8,5 @@ test.py
 /models
 /model_pattern_recog
 /data
+/vectors.json
+/tags.json
