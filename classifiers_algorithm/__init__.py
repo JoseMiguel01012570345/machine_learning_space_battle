@@ -12,6 +12,7 @@ from models.logistic_model import logistic_regression_signal_classifier
 from models.knn_model import knn_signal_classifier
 from models.kmeans_model import kmeans_signal_classifier
 from models.dbscan_model import dbscan_signal_classifier
+from models.decision_tree import decision_tree_classifier , decision_tree_regressor
 from signals import get_samples_features_vectors
 
 def matrix2signal(matrix):

@@ -1,5 +1,2 @@
-kmeans SilhouetteScore: 0.8057451354961959 
-"Silhouette Score: 0.3149880548050784 , dbscan Adjusted Mutual Info Score: None , dbscan Completness: None , dbscan Homogeneity: None , dbscan VMeasure: None
-svm accuracy score:  0.461
-knn accuracy score:  0.3546666666666667
-logisitic acurracy score: 0.442
+decision tree classifier score , mae: 0.14233333333333334 , mse: 6.711
+decision tree regressor score , mae: 0.073 , mse: 3.0416666666666665

@@ -34,13 +34,15 @@ def create_model_selector( input_data=5 ):
 
 def train_selector(load_json=0): # train clasifier model
     
-    import model_peformance
     os.system('cls')
     
     tags=[]
     vectors=[]
     
     if not load_json:
+        
+        import model_peformance
+        
         vectors , tags =  model_peformance.main(path='./dataset_black_white/train' , save=0 , train_selector=1 , len_dataset=150)
         with open('./vectors.json' , mode='w') as f:
             json.dump(vectors, f, indent=4)
@@ -48,14 +50,14 @@ def train_selector(load_json=0): # train clasifier model
         with open('./tags.json' , mode='w') as f:
             json.dump(tags, f, indent=4)
     else:
-        with open('./vectors.json' , mode='r') as f:
-            print('loading vectors')
-            vectors = json.load(fp=f)
-            vectors = np.array(vectors)
         with open('./tags.json' , mode='r') as f:
             print('loading tags')
             tags = json.load(fp=f)
             tags = np.array(tags)
+        with open('./vectors.json' , mode='r') as f:
+            print('loading vectors')
+            vectors = json.load(fp=f)
+            vectors = np.array(vectors)
     
     s = ''
     try: # kmeans
@@ -92,7 +94,24 @@ def train_selector(load_json=0): # train clasifier model
         s +=  f'logisitic acurracy score: { logistic.AccuracyScore}\n'
     except Exception as e:
         print('error at logisitic model: ', e)
+    try:
+        dtree=classifiers_algorithm.decision_tree_classifier(vector=vectors , tags=tags)
+        joblib.dump(dtree.Model, './model_classifiers/dtree_clasif.joblib')
+        s +=  f'decision tree classifier score , mae: { dtree.score_mae} , mse: {dtree.score_mse}\n'
+    except Exception as e:
+        print('error at decision tree model: ', e)
+    
+    try:
+        dtree=classifiers_algorithm.decision_tree_regressor(vector=vectors , tags=tags)
+        joblib.dump(dtree.Model, './model_classifiers/dtree_regre.joblib')
+        s +=  f'decision tree regressor score , mae: { dtree.score_mae} , mse: {dtree.score_mse}\n'
+        
+    except Exception as e:
+        print('error at decision tree model: ', e)
+        
 
     with open('./classifier_metric_peformance.txt' , mode='w') as f:
-       f.write(s)     
+       f.write(s)
+
     
+train_selector(load_json=1)
